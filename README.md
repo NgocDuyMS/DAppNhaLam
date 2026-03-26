@@ -5,6 +5,7 @@
 DAppNhaLam là một ứng dụng bầu cử phi tập trung (Decentralized Application - dApp) cho phép người dùng tạo và tham gia các cuộc bầu cử một cách **minh bạch, bảo mật và ẩn danh**.
 
 Dự án sử dụng công nghệ Blockchain (Oasis Sapphire) để đảm bảo:
+
 - 🔒 Tính riêng tư (Privacy)
 - 🧾 Tính minh bạch (Transparency)
 - 🚫 Không thể gian lận (Tamper-proof)
@@ -14,21 +15,25 @@ Dự án sử dụng công nghệ Blockchain (Oasis Sapphire) để đảm bảo
 ## 🚀 Công nghệ sử dụng
 
 ### Frontend
+
 - Next.js (App Router)
 - TypeScript
 - Tailwind CSS
 
 ### Backend (Smart Contract)
+
 - Solidity
 - Hardhat
 - Ethers.js
 
 ### Blockchain
+
 - Oasis Sapphire Testnet
 
 ---
 
 ## 📂 Cấu trúc dự án
+
 DAppNhaLam
 ├── backend-contracts # Smart Contracts (Solidity)
 │ ├── contracts
@@ -43,12 +48,12 @@ DAppNhaLam
 ├── types
 └── utils
 
-
 ---
 
 ## ⚙️ Cài đặt & Chạy dự án
 
 ### 1. Clone project
+
 ```bash
 git clone <your-repo-url>
 cd DAppNhaLam
@@ -57,9 +62,14 @@ cd DAppNhaLam
 cd backend-contracts
 
 npm install
+// compile smart contract
 npx hardhat compile
+// chay local blockchain
+npx hardhat node
+// deploy contract len local blockchain ( them 1 terminal chay song song)
+npx hardhat run scripts/deploy.ts --network localhost
 
-// chạy frontend 
+// chạy frontend
 cd frontend-web
 
 npm install
@@ -106,8 +116,8 @@ Hardhat + Oasis Testnet
 
 
 📸 Demo (tuỳ chọn)
-Video demo: 
-Website live: 
+Video demo:
+Website live:
 
 👥 Thành viên
 Ngọc Duy - Frontend + Web3 Integration
@@ -119,3 +129,4 @@ MIT License
 
 
 ---
+```
