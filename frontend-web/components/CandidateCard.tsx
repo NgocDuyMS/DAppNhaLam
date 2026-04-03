@@ -43,7 +43,7 @@ export default function CandidateCard({
       </div>
 
       {/* Phần Body: Mô tả ứng viên */}
-      <div className="flex-grow mb-6">
+      <div className="grow mb-6">
         {description ? (
           <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
             {description}
@@ -56,13 +56,13 @@ export default function CandidateCard({
       {/* Phần Footer: Nút bấm */}
       <button
         onClick={() => onVote(id)}
-        className={`w-full py-3 mt-auto text-base font-bold rounded-xl transition-all duration-200 
+        className={`w-full py-3 mt-auto text-base font-bold rounded-xl transition-all duration-300 transform active:scale-95 
           ${isSelected 
-            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:shadow-lg' 
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+            ? 'bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' 
+            : 'bg-gray-50 text-gray-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-transparent'
           }`}
       >
-        {isSelected ? 'Đang chọn làm đại diện ✓' : 'Bầu chọn'}
+        {isSelected ? 'Đang chọn làm đại diện ✓' : 'Bầu chọn ngay'}
       </button>
     </div>
   );
