@@ -10,11 +10,14 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@oasisprotocol/sapphire-ethers-v6": "^6.0.1",
+    "@oasisprotocol/sapphire-paratime": "^2.3.0",
     "ethers": "^6.16.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.72.0",
+    "recharts": "^3.8.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
