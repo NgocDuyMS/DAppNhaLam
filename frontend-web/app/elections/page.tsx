@@ -10,14 +10,14 @@ import { CONTRACT_ADDRESS } from "@/utils/contract";
 // ─── Skeleton Card ────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div className="skeleton-card rounded-3xl p-6 h-52 overflow-hidden relative">
-      <div className="skeleton-line w-1/3 h-3 rounded-full mb-5" />
-      <div className="skeleton-line w-3/4 h-5 rounded-full mb-3" />
-      <div className="skeleton-line w-full h-3 rounded-full mb-2" />
-      <div className="skeleton-line w-5/6 h-3 rounded-full mb-8" />
-      <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center">
-        <div className="skeleton-line w-24 h-3 rounded-full" />
-        <div className="skeleton-line w-20 h-3 rounded-full" />
+    <div className="sk-card rounded-2xl p-5 h-48 overflow-hidden relative">
+      <div className="sk-line w-1/4 h-3 rounded-full mb-4" />
+      <div className="sk-line w-3/4 h-5 rounded-full mb-3" />
+      <div className="sk-line w-full h-3 rounded-full mb-2" />
+      <div className="sk-line w-5/6 h-3 rounded-full mb-6" />
+      <div className="absolute bottom-5 left-5 right-5 flex justify-between">
+        <div className="sk-line w-20 h-3 rounded-full" />
+        <div className="sk-line w-16 h-3 rounded-full" />
       </div>
     </div>
   );
@@ -30,12 +30,11 @@ function ElectionCard({ election, index }: { election: Election; index: number }
   const isActive = election.status === 'Active';
 
   useEffect(() => {
-    const el = ref.current!;
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
       { threshold: 0.1 }
     );
-    obs.observe(el);
+    obs.observe(ref.current!);
     return () => obs.disconnect();
   }, []);
 
@@ -51,73 +50,69 @@ function ElectionCard({ election, index }: { election: Election; index: number }
     <div
       ref={ref}
       style={{
-        transitionDelay: `${index * 80}ms`,
+        transitionDelay: `${index * 70}ms`,
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0) scale(1)" : "translateY(32px) scale(0.97)",
-        transition: "opacity 0.6s cubic-bezier(.22,1,.36,1), transform 0.6s cubic-bezier(.22,1,.36,1)",
+        transform: visible ? "translateY(0)" : "translateY(20px)",
+        transition: "opacity 0.5s ease, transform 0.5s ease",
       }}
-      className="election-card group relative rounded-3xl p-6 flex flex-col gap-4 overflow-hidden cursor-pointer"
+      className="e-card group relative bg-white rounded-2xl p-5 flex flex-col gap-3 border border-slate-100 cursor-pointer"
     >
-      {/* Glow on hover */}
-      <div className={`card-glow absolute inset-0 rounded-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${isActive ? 'glow-green' : 'glow-blue'}`} />
-
       {/* Top row */}
-      <div className="flex items-start justify-between gap-3 relative z-10">
-        <span className="text-slate-500 text-xs font-mono font-bold tracking-widest">#{String(election.id).padStart(3, '0')}</span>
+      <div className="flex items-center justify-between">
+        <span className="text-slate-300 text-xs font-mono font-bold tracking-widest">
+          #{String(election.id).padStart(3, '0')}
+        </span>
         {isActive ? (
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Đang diễn ra
           </span>
         ) : (
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-slate-400 bg-slate-400/10 border border-slate-400/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-slate-400 bg-slate-50 border border-slate-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
             Đã kết thúc
           </span>
         )}
       </div>
 
-      {/* Title */}
-      <div className="relative z-10">
-        <h2 className="text-lg font-bold text-white leading-snug line-clamp-1 group-hover:text-blue-300 transition-colors duration-300">
+      {/* Title + desc */}
+      <div>
+        <h2 className="text-base font-bold text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors duration-200">
           {election.title}
         </h2>
-        <p className="text-slate-500 text-sm mt-1.5 line-clamp-2 leading-relaxed">
+        <p className="text-slate-400 text-sm mt-1 line-clamp-2 leading-relaxed">
           {election.description}
         </p>
       </div>
 
-      {/* Progress bar (only for active) */}
+      {/* Progress */}
       {isActive && (
-        <div className="relative z-10">
-          <div className="flex justify-between text-xs text-slate-600 mb-1.5">
+        <div>
+          <div className="flex justify-between text-xs text-slate-400 mb-1">
             <span>Tiến độ</span>
-            <span>{Math.floor(progress)}%</span>
+            <span className="font-semibold text-blue-500">{Math.floor(progress)}%</span>
           </div>
-          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full progress-bar"
-              style={{ width: `${progress}%` }}
-            />
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="e-progress h-full rounded-full" style={{ width: `${progress}%` }} />
           </div>
         </div>
       )}
 
       {/* Footer */}
-      <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
-        <div className="text-xs text-slate-600 flex items-center gap-1">
+      <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
+        <div className="text-xs text-slate-300 flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <path strokeLinecap="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           {election.endTime > 0 ? formatDate(election.endTime) : "—"}
         </div>
         <Link
           href={`/elections/${election.id}`}
-          className="cta-link group/link flex items-center gap-1.5 text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
+          className="flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors"
         >
           Tham gia
-          <svg className="w-3.5 h-3.5 transition-transform duration-200 group-hover/link:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+          <svg className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
           </svg>
         </Link>
       </div>
@@ -135,9 +130,8 @@ export default function ElectionsListPage() {
   useEffect(() => {
     const fetchElections = async () => {
       try {
-        const provider = new ethers.BrowserProvider(window.ethereum, {
-          chainId: 23295,
-          name: "unknown",
+        const provider = new ethers.JsonRpcProvider("https://testnet.sapphire.oasis.dev", 23295, {
+          staticNetwork: true,
         });
         const contract = new ethers.Contract(CONTRACT_ADDRESS, PrivateVotingABI.abi, provider);
         let fetchedElections: Election[] = [];
@@ -185,229 +179,259 @@ export default function ElectionsListPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
 
-        .elections-root {
+        * { font-family: 'Be Vietnam Pro', sans-serif; }
+
+        .page-root {
           min-height: 100vh;
-          background-color: #050917;
-          background-image:
-            radial-gradient(ellipse 70% 40% at 15% 0%, rgba(59,130,246,0.10) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 50% at 85% 20%, rgba(168,85,247,0.08) 0%, transparent 60%);
-          font-family: 'DM Sans', sans-serif;
-          color: #e2e8f0;
+          background: #f8fafc;
+        }
+
+        /* Header strip */
+        .page-header-strip {
+          background: #fff;
+          border-bottom: 1px solid #f1f5f9;
+          padding: 2rem 1.5rem 1.5rem;
         }
 
         .page-title {
-          font-family: 'Outfit', sans-serif;
-          background: linear-gradient(135deg, #fff 30%, #93c5fd 70%, #c4b5fd 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: #0f172a;
+          letter-spacing: -0.02em;
         }
 
         /* Create button */
         .btn-create {
-          background: linear-gradient(135deg, #3b82f6, #6366f1);
-          background-size: 200% 200%;
-          animation: gradShift 3s ease infinite;
-          border-radius: 14px;
-          font-weight: 700;
-          font-size: 0.875rem;
-          padding: 0.625rem 1.25rem;
-          color: #fff;
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          transition: transform 0.2s ease, box-shadow 0.3s ease;
+          padding: 0.55rem 1.1rem;
+          border-radius: 10px;
+          background: #2563eb;
+          color: #fff;
+          font-size: 0.85rem;
+          font-weight: 600;
+          transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+          white-space: nowrap;
         }
         .btn-create:hover {
-          transform: translateY(-2px) scale(1.03);
-          box-shadow: 0 0 30px rgba(99,102,241,0.5);
-        }
-        @keyframes gradShift {
-          0%,100% { background-position:0% 50%; }
-          50%      { background-position:100% 50%; }
+          background: #1d4ed8;
+          box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+          transform: translateY(-1px);
         }
 
         /* Filter tabs */
         .filter-tab {
-          padding: 0.45rem 1.1rem;
-          border-radius: 999px;
+          padding: 0.4rem 1rem;
+          border-radius: 8px;
           font-size: 0.8rem;
           font-weight: 600;
-          border: 1px solid rgba(255,255,255,0.08);
-          background: transparent;
-          color: #94a3b8;
+          border: 1px solid #e2e8f0;
+          background: #fff;
+          color: #64748b;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.15s ease;
         }
-        .filter-tab:hover { color: #e2e8f0; border-color: rgba(255,255,255,0.2); }
+        .filter-tab:hover { border-color: #cbd5e1; color: #334155; }
         .filter-tab.active {
-          background: rgba(99,102,241,0.15);
-          border-color: rgba(99,102,241,0.4);
-          color: #a5b4fc;
+          background: #eff6ff;
+          border-color: #bfdbfe;
+          color: #2563eb;
         }
 
         /* Search */
+        .search-wrap { position: relative; }
+        .search-icon {
+          position: absolute; left: 10px; top: 50%;
+          transform: translateY(-50%);
+          color: #94a3b8;
+          pointer-events: none;
+        }
         .search-input {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 14px;
-          padding: 0.6rem 1rem 0.6rem 2.6rem;
-          color: #e2e8f0;
-          font-size: 0.875rem;
-          width: 220px;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 0.5rem 0.9rem 0.5rem 2.2rem;
+          color: #1e293b;
+          font-size: 0.85rem;
+          width: 210px;
           outline: none;
-          font-family: 'DM Sans', sans-serif;
+          transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .search-input::placeholder { color: #475569; }
+        .search-input::placeholder { color: #cbd5e1; }
         .search-input:focus {
-          border-color: rgba(99,102,241,0.5);
-          box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+          border-color: #93c5fd;
+          box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
         }
 
-        /* Cards */
-        .election-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
-          backdrop-filter: blur(12px);
-          transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        /* Election card */
+        .e-card {
+          transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
         }
-        .election-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(99,102,241,0.25);
-          box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,102,241,0.1);
+        .e-card:hover {
+          box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+          transform: translateY(-2px);
+          border-color: #e2e8f0;
         }
 
-        .card-glow { border-radius: 24px; }
-        .glow-green { box-shadow: inset 0 0 60px rgba(52,211,153,0.06); }
-        .glow-blue  { box-shadow: inset 0 0 60px rgba(99,102,241,0.06); }
-
-        .progress-bar {
-          background: linear-gradient(90deg, #3b82f6, #818cf8);
-          box-shadow: 0 0 8px rgba(99,102,241,0.6);
+        /* Progress bar */
+        .e-progress {
+          background: linear-gradient(90deg, #3b82f6, #60a5fa);
         }
 
         /* Skeleton */
-        .skeleton-card {
-          background: rgba(255,255,255,0.025);
-          border: 1px solid rgba(255,255,255,0.05);
+        .sk-card {
+          background: #fff;
+          border: 1px solid #f1f5f9;
         }
-        .skeleton-line {
-          background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+        .sk-line {
           display: block;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.4s infinite;
         }
         @keyframes shimmer {
           0%   { background-position: 200% 0; }
           100% { background-position: -200% 0; }
         }
 
-        /* Empty state */
-        .empty-state {
-          border: 1px dashed rgba(255,255,255,0.1);
-          border-radius: 24px;
-          background: rgba(255,255,255,0.02);
+        /* Stats pill */
+        .stats-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          padding: 0.2rem 0.7rem;
+          border-radius: 999px;
+          background: #eff6ff;
+          border: 1px solid #dbeafe;
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #3b82f6;
         }
 
-        /* Stats badge */
-        .stats-badge {
-          background: rgba(99,102,241,0.1);
-          border: 1px solid rgba(99,102,241,0.2);
+        /* Empty state */
+        .empty-box {
+          border: 1.5px dashed #e2e8f0;
+          border-radius: 20px;
+          background: #fff;
+        }
+
+        /* Chain badge */
+        .chain-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.25rem 0.7rem;
           border-radius: 999px;
-          padding: 0.3rem 0.8rem;
-          font-size: 0.75rem;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          font-size: 0.7rem;
           font-weight: 700;
-          color: #a5b4fc;
+          color: #64748b;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+        .chain-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 5px rgba(16,185,129,0.6);
+          animation: cpulse 2s ease-in-out infinite;
+        }
+        @keyframes cpulse {
+          0%,100% { opacity:1; } 50% { opacity:0.4; }
         }
       `}</style>
 
-      <div className="elections-root px-6 py-14">
-        <div className="max-w-5xl mx-auto">
+      <div className="page-root">
 
-          {/* ── Header ─────────────────────────────────────────────── */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400 mb-2">On-chain · Oasis Sapphire</p>
-              <h1 className="page-title text-3xl md:text-4xl font-extrabold leading-tight">
-                Danh sách Bầu cử
-              </h1>
-              <div className="flex items-center gap-3 mt-3">
+        {/* ── Page header strip ──────────────────────────────────── */}
+        <div className="page-header-strip">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                {/* Chain indicator */}
+                <div className="chain-badge mb-3">
+                  <span className="chain-dot" />
+                  Oasis Sapphire · Testnet
+                </div>
+
+                <h1 className="page-title">Danh sách Bầu cử</h1>
+
                 {!isLoading && (
-                  <>
-                    <span className="stats-badge">{elections.length} tổng</span>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="stats-pill">{elections.length} cuộc bầu cử</span>
                     {activeCount > 0 && (
-                      <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                      <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                         {activeCount} đang diễn ra
                       </span>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
+
+              <Link href="/elections/create" className="btn-create self-start sm:self-auto">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Tạo cuộc bầu cử
+              </Link>
             </div>
 
-            <Link href="/elections/create" className="btn-create self-start sm:self-auto">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              Tạo cuộc bầu cử
-            </Link>
-          </div>
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-5">
+              <div className="flex gap-2">
+                {(['all', 'active', 'ended'] as const).map((f) => (
+                  <button key={f} onClick={() => setFilter(f)} className={`filter-tab ${filter === f ? 'active' : ''}`}>
+                    {f === 'all' ? 'Tất cả' : f === 'active' ? '● Đang diễn ra' : '○ Đã kết thúc'}
+                  </button>
+                ))}
+              </div>
 
-          {/* ── Toolbar ────────────────────────────────────────────── */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-            {/* Filter tabs */}
-            <div className="flex gap-2">
-              {(['all', 'active', 'ended'] as const).map((f) => (
-                <button key={f} onClick={() => setFilter(f)} className={`filter-tab ${filter === f ? 'active' : ''}`}>
-                  {f === 'all' ? 'Tất cả' : f === 'active' ? '🟢 Đang diễn ra' : '⚫ Đã kết thúc'}
-                </button>
-              ))}
-            </div>
-
-            {/* Search */}
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-              </svg>
-              <input
-                type="text"
-                placeholder="Tìm kiếm..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="search-input"
-              />
+              <div className="search-wrap">
+                <svg className="search-icon w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="search-input"
+                />
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* ── Content ────────────────────────────────────────────── */}
+        {/* ── Content ───────────────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-6 py-8">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {[1,2,3,4].map(i => <SkeletonCard key={i} />)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="empty-state py-24 text-center">
-              <div className="text-4xl mb-4">🗳️</div>
-              <p className="text-slate-400 font-medium text-base mb-1">
-                {search ? `Không tìm thấy kết quả cho "${search}"` : "Chưa có cuộc bầu cử nào"}
+            <div className="empty-box py-24 text-center">
+              <div className="text-4xl mb-3">🗳️</div>
+              <p className="text-slate-500 font-semibold text-base mb-1">
+                {search ? `Không có kết quả cho "${search}"` : "Chưa có cuộc bầu cử nào"}
               </p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-slate-400 text-sm">
                 {search ? "Thử từ khóa khác nhé" : "Hãy là người đầu tiên tạo!"}
               </p>
               {!search && (
-                <Link href="/elections/create" className="btn-create inline-flex mt-6">
+                <Link href="/elections/create" className="btn-create inline-flex mt-5">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    <path strokeLinecap="round" d="M12 4.5v15m7.5-7.5h-15" />
                   </svg>
                   Tạo ngay
                 </Link>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filtered.map((election, i) => (
                 <ElectionCard key={election.id} election={election} index={i} />
               ))}

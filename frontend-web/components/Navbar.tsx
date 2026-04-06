@@ -42,7 +42,7 @@ export default function Navbar() {
               <button
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="px-6 py-2.5 font-bold text-white transition duration-300 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 font-bold text-white transition duration-300 rounded-lg bg-linear-to-r from-blue-600 to-indigo-600 hover:shadow-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isConnecting ? "Đang kết nối..." : "Kết nối Ví"}
               </button>

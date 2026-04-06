@@ -36,10 +36,16 @@ export default function CandidateCard({
             name.charAt(0).toUpperCase()
           )}
         </div>
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 line-clamp-1">{name}</h3>
-          <p className="text-sm font-medium text-gray-500 font-mono mt-0.5">ID: #{id}</p>
-        </div>
+        <h3 
+  className="text-xl font-bold text-gray-900 truncate" 
+  title={name} // Mẹo UX: Thêm thuộc tính title để khi di chuột vào, nó hiện ra tên đầy đủ!
+>
+  {name}
+</h3>
+
+<p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+  {description}
+</p>
       </div>
 
       {/* Phần Body: Mô tả ứng viên */}

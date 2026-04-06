@@ -23,21 +23,20 @@ const formSchema = z.object({
 
 type ElectionFormValues = z.infer<typeof formSchema>;
 
-// ─── Step indicator ───────────────────────────────────────────────────────────
+// ─── Step dot ────────────────────────────────────────────────────────────────
 function StepDot({ n, active, done }: { n: number; active: boolean; done: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <div className={`step-dot ${active ? 'step-active' : done ? 'step-done' : 'step-idle'}`}>
-        {done ? (
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-          </svg>
-        ) : n}
-      </div>
+    <div className={`step-dot ${active ? 'step-active' : done ? 'step-done' : 'step-idle'}`}>
+      {done ? (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+      ) : n}
     </div>
   );
 }
 
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function CreateElectionPage() {
   const { register, control, handleSubmit, watch, formState: { errors } } = useForm<ElectionFormValues>({
     resolver: zodResolver(formSchema),
@@ -49,7 +48,6 @@ export default function CreateElectionPage() {
     isOpen: false, status: 'idle' as TxStatus, message: '', txHash: '',
   });
 
-  // derive active step for visual indicator
   const watched = watch(["title", "description", "startTime", "endTime"]);
   const step1Done = watched[0].length >= 5 && watched[1].length >= 10;
   const step2Done = watched[2].length > 0 && watched[3].length > 0;
@@ -59,6 +57,7 @@ export default function CreateElectionPage() {
       setModalState({ isOpen: true, status: 'waiting_wallet', message: 'Vui lòng xác nhận giao dịch trên MetaMask của bạn...', txHash: '' });
       if (!window.ethereum) throw new Error("Không tìm thấy ví MetaMask!");
       const provider = new ethers.BrowserProvider(window.ethereum);
+      
       const contract = await getVotingContract(provider, false);
       const startTimestamp = Math.floor(new Date(data.startTime).getTime() / 1000);
       const endTimestamp = Math.floor(new Date(data.endTime).getTime() / 1000);
@@ -76,254 +75,210 @@ export default function CreateElectionPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+        * { font-family: 'Be Vietnam Pro', sans-serif; }
 
         .create-root {
           min-height: 100vh;
-          background-color: #050917;
-          background-image:
-            radial-gradient(ellipse 60% 50% at 10% 0%,  rgba(59,130,246,0.10) 0%, transparent 65%),
-            radial-gradient(ellipse 50% 40% at 90% 15%, rgba(168,85,247,0.08) 0%, transparent 60%);
-          font-family: 'DM Sans', sans-serif;
-          color: #e2e8f0;
-          padding: 4rem 1.5rem 6rem;
+          background: #f8fafc;
+          color: #1e293b;
+        }
+
+        .create-header-strip {
+          background: #fff;
+          border-bottom: 1px solid #f1f5f9;
+          padding: 2rem 1.5rem 1.5rem;
         }
 
         .page-title {
-          font-family: 'Outfit', sans-serif;
-          background: linear-gradient(135deg, #fff 30%, #93c5fd 70%, #c4b5fd 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: #0f172a;
+          letter-spacing: -0.02em;
         }
 
-        /* Card */
+        .chain-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.25rem 0.7rem;
+          border-radius: 999px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: #64748b;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          margin-bottom: 0.75rem;
+        }
+        .chain-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 5px rgba(16,185,129,0.6);
+          animation: cpulse 2s ease-in-out infinite;
+        }
+        @keyframes cpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* Steps */
+        .step-dot {
+          width: 32px; height: 32px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+          transition: all 0.25s ease;
+        }
+        .step-idle   { background:#f1f5f9; border:1.5px solid #e2e8f0; color:#94a3b8; }
+        .step-active { background:#eff6ff; border:1.5px solid #93c5fd; color:#2563eb; box-shadow:0 0 0 4px rgba(37,99,235,0.08); }
+        .step-done   { background:#f0fdf4; border:1.5px solid #86efac; color:#16a34a; }
+        .step-line   { flex:1; height:1px; background:#e2e8f0; }
+
+        /* Form card */
         .form-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          backdrop-filter: blur(16px);
-          border-radius: 28px;
-          padding: 2.5rem;
+          background: #fff;
+          border: 1px solid #f1f5f9;
+          border-radius: 20px;
+          padding: 2rem;
+          box-shadow: 0 1px 4px rgba(15,23,42,0.04);
         }
 
-        /* Section block */
         .form-section {
-          background: rgba(255,255,255,0.025);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 20px;
-          padding: 1.5rem;
+          background: #f8fafc;
+          border: 1px solid #f1f5f9;
+          border-radius: 14px;
+          padding: 1.25rem;
         }
 
         .section-label {
-          font-family: 'Outfit', sans-serif;
-          font-size: 0.7rem;
+          font-size: 0.68rem;
           font-weight: 700;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: #6366f1;
+          color: #2563eb;
           margin-bottom: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
+          display: flex; align-items: center; gap: 0.4rem;
         }
 
         /* Inputs */
         .field-label {
           display: block;
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: #94a3b8;
-          margin-bottom: 0.45rem;
-          letter-spacing: 0.02em;
+          font-size: 0.8rem; font-weight: 600; color: #475569;
+          margin-bottom: 0.4rem;
         }
-
         .field-input {
           width: 100%;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.09);
-          border-radius: 14px;
-          padding: 0.7rem 1rem;
-          color: #e2e8f0;
-          font-size: 0.9rem;
-          font-family: 'DM Sans', sans-serif;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-          outline: none;
-          color-scheme: dark;
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 0.65rem 0.9rem;
+          color: #1e293b; font-size: 0.875rem;
+          outline: none; color-scheme: light;
+          transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .field-input::placeholder { color: #334155; }
+        .field-input::placeholder { color: #cbd5e1; }
         .field-input:focus {
-          border-color: rgba(99,102,241,0.5);
-          background: rgba(99,102,241,0.04);
-          box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+          border-color: #93c5fd;
+          box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
         }
-        .field-input.error {
-          border-color: rgba(239,68,68,0.5);
+        .field-input.has-error {
+          border-color: #fca5a5;
           box-shadow: 0 0 0 3px rgba(239,68,68,0.08);
         }
-
-        textarea.field-input { resize: none; height: 96px; }
+        textarea.field-input { resize:none; height:90px; }
 
         .field-error {
-          margin-top: 0.4rem;
-          font-size: 0.78rem;
-          color: #f87171;
-          display: flex;
-          align-items: center;
-          gap: 0.3rem;
+          margin-top: 0.35rem; font-size: 0.775rem; color: #ef4444;
+          display: flex; align-items: center; gap: 0.3rem;
         }
 
-        /* Candidate row */
+        /* Candidates */
         .candidate-row {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          animation: fadeSlideIn 0.3s cubic-bezier(.22,1,.36,1) both;
+          display: flex; align-items: center; gap: 0.6rem;
+          animation: fadeUp 0.25s ease both;
         }
-        @keyframes fadeSlideIn {
-          from { opacity:0; transform: translateY(12px); }
-          to   { opacity:1; transform: translateY(0); }
-        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
         .candidate-index {
-          width: 28px;
-          height: 28px;
-          min-width: 28px;
-          border-radius: 50%;
-          background: rgba(99,102,241,0.15);
-          border: 1px solid rgba(99,102,241,0.25);
-          color: #818cf8;
-          font-size: 0.72rem;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'Outfit', sans-serif;
+          width:26px; height:26px; min-width:26px; border-radius:50%;
+          background:#eff6ff; border:1px solid #dbeafe;
+          color:#3b82f6; font-size:0.72rem; font-weight:700;
+          display:flex; align-items:center; justify-content:center;
         }
 
         .btn-remove {
-          width: 36px;
-          height: 36px;
-          min-width: 36px;
-          border-radius: 10px;
-          background: rgba(239,68,68,0.08);
-          border: 1px solid rgba(239,68,68,0.15);
-          color: #f87171;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.2s, border-color 0.2s, transform 0.15s;
-          cursor: pointer;
+          width:34px; height:34px; min-width:34px; border-radius:8px;
+          background:#fff5f5; border:1px solid #fecaca; color:#ef4444;
+          display:flex; align-items:center; justify-content:center;
+          cursor:pointer; transition:background 0.15s, transform 0.15s;
         }
-        .btn-remove:hover {
-          background: rgba(239,68,68,0.15);
-          border-color: rgba(239,68,68,0.35);
-          transform: scale(1.08);
-        }
+        .btn-remove:hover { background:#fee2e2; transform:scale(1.06); }
 
         .btn-add-candidate {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.4rem;
-          padding: 0.5rem 1rem;
-          border-radius: 12px;
-          background: rgba(99,102,241,0.08);
-          border: 1px dashed rgba(99,102,241,0.3);
-          color: #818cf8;
-          font-size: 0.82rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background 0.2s, border-color 0.2s, color 0.2s;
-          font-family: 'DM Sans', sans-serif;
+          display:inline-flex; align-items:center; gap:0.35rem;
+          padding:0.4rem 0.85rem; border-radius:8px;
+          background:#fff; border:1.5px dashed #bfdbfe;
+          color:#3b82f6; font-size:0.8rem; font-weight:600;
+          cursor:pointer; transition:background 0.15s, border-color 0.15s;
         }
-        .btn-add-candidate:hover {
-          background: rgba(99,102,241,0.14);
-          border-color: rgba(99,102,241,0.5);
-          color: #a5b4fc;
+        .btn-add-candidate:hover { background:#eff6ff; border-color:#93c5fd; }
+
+        .count-badge {
+          padding:0.15rem 0.55rem; border-radius:999px;
+          background:#eff6ff; border:1px solid #dbeafe;
+          color:#3b82f6; font-size:0.72rem; font-weight:700;
         }
 
-        /* Step dots */
-        .step-dot {
-          width: 32px; height: 32px; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 0.8rem; font-weight: 700;
-          transition: all 0.3s ease;
-          font-family: 'Outfit', sans-serif;
-        }
-        .step-idle  { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #475569; }
-        .step-active{ background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.5); color: #a5b4fc; box-shadow: 0 0 16px rgba(99,102,241,0.3); }
-        .step-done  { background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.4); color: #34d399; }
-
-        .step-line {
-          flex: 1; height: 1px;
-          background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-        }
+        .form-divider { border:none; height:1px; background:#f1f5f9; margin:0.25rem 0; }
 
         /* Buttons */
         .btn-submit {
-          background: linear-gradient(135deg, #3b82f6, #6366f1, #a855f7);
-          background-size: 200% 200%;
-          animation: gradShift 3s ease infinite;
-          border-radius: 16px;
-          padding: 0.85rem 2rem;
-          font-weight: 700;
-          font-size: 0.95rem;
-          color: #fff;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          transition: transform 0.2s ease, box-shadow 0.3s ease;
-          font-family: 'Outfit', sans-serif;
-          letter-spacing: 0.01em;
-          cursor: pointer;
+          display:inline-flex; align-items:center; gap:0.45rem;
+          padding:0.7rem 1.6rem; border-radius:10px;
+          background:#2563eb; color:#fff;
+          font-size:0.875rem; font-weight:700; cursor:pointer;
+          transition:background 0.15s, box-shadow 0.15s, transform 0.15s;
         }
         .btn-submit:hover {
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 0 40px rgba(99,102,241,0.5), 0 16px 32px rgba(0,0,0,0.3);
-        }
-        @keyframes gradShift {
-          0%,100% { background-position:0% 50%; }
-          50%      { background-position:100% 50%; }
+          background:#1d4ed8;
+          box-shadow:0 4px 14px rgba(37,99,235,0.3);
+          transform:translateY(-1px);
         }
 
         .btn-cancel {
-          padding: 0.85rem 1.5rem;
-          border-radius: 16px;
-          font-weight: 600;
-          font-size: 0.875rem;
-          color: #64748b;
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.07);
-          transition: color 0.2s, border-color 0.2s, background 0.2s;
-          font-family: 'DM Sans', sans-serif;
+          display:inline-flex; align-items:center; gap:0.3rem;
+          padding:0.7rem 1.2rem; border-radius:10px;
+          background:transparent; border:1px solid #e2e8f0;
+          color:#64748b; font-size:0.875rem; font-weight:600;
+          transition:border-color 0.15s, color 0.15s, background 0.15s;
         }
-        .btn-cancel:hover {
-          color: #94a3b8;
-          border-color: rgba(255,255,255,0.15);
-          background: rgba(255,255,255,0.03);
-        }
+        .btn-cancel:hover { border-color:#cbd5e1; color:#475569; background:#f8fafc; }
 
-        .divider {
-          border: none;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
-          margin: 1.5rem 0;
+        .info-note {
+          display:flex; align-items:flex-start; gap:0.6rem;
+          padding:0.85rem 1rem; border-radius:12px;
+          background:#f0f9ff; border:1px solid #bae6fd;
         }
       `}</style>
 
       <div className="create-root">
-        <div className="max-w-2xl mx-auto">
 
-          {/* ── Page header ───────────────────────────────────────── */}
-          <div className="mb-8">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400 mb-2">On-chain · Oasis Sapphire</p>
-            <h1 className="page-title text-3xl md:text-4xl font-extrabold leading-tight">
-              Tạo Cuộc Bầu Cử Mới
-            </h1>
-            <p className="text-slate-500 text-sm mt-2">Dữ liệu được mã hóa và ghi lên blockchain ngay lập tức.</p>
+        {/* Header */}
+        <div className="create-header-strip">
+          <div className="max-w-2xl mx-auto">
+            <div className="chain-badge">
+              <span className="chain-dot" />
+              Oasis Sapphire · Testnet
+            </div>
+            <h1 className="page-title">Tạo Cuộc Bầu Cử Mới</h1>
+            <p className="text-sm text-slate-400 mt-1">Dữ liệu được mã hóa và ghi lên blockchain ngay lập tức.</p>
           </div>
+        </div>
 
-          {/* ── Step indicator ────────────────────────────────────── */}
-          <div className="flex items-center gap-3 mb-8 px-1">
+        {/* Body */}
+        <div className="max-w-2xl mx-auto px-6 py-8">
+
+          {/* Steps */}
+          <div className="flex items-center gap-2 mb-6">
             <StepDot n={1} active={!step1Done} done={step1Done} />
             <div className="step-line" />
             <StepDot n={2} active={step1Done && !step2Done} done={step2Done} />
@@ -331,84 +286,63 @@ export default function CreateElectionPage() {
             <StepDot n={3} active={step1Done && step2Done} done={false} />
           </div>
 
-          {/* ── Form card ─────────────────────────────────────────── */}
+          {/* Form card */}
           <div className="form-card">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-              {/* Section 1 — Basic info */}
+              {/* Section 1 */}
               <div className="form-section">
                 <div className="section-label">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" d="M16.862 4.487 18.35 2.999a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
+                  </svg>
                   Thông tin cơ bản
                 </div>
-
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
                     <label className="field-label">Tiêu đề bầu cử</label>
-                    <input
-                      {...register("title")}
-                      placeholder="VD: Bầu chọn Ban điều hành Q3 2025"
-                      className={`field-input ${errors.title ? 'error' : ''}`}
-                    />
-                    {errors.title && (
-                      <p className="field-error">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>
-                        {errors.title.message}
-                      </p>
-                    )}
+                    <input {...register("title")} placeholder="VD: Bầu chọn Ban điều hành Q3 2025" className={`field-input ${errors.title ? 'has-error' : ''}`} />
+                    {errors.title && <p className="field-error"><svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>{errors.title.message}</p>}
                   </div>
-
                   <div>
                     <label className="field-label">Mô tả chi tiết</label>
-                    <textarea
-                      {...register("description")}
-                      placeholder="Mô tả mục tiêu, quy trình và các thông tin quan trọng của cuộc bầu cử..."
-                      className={`field-input ${errors.description ? 'error' : ''}`}
-                    />
-                    {errors.description && (
-                      <p className="field-error">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>
-                        {errors.description.message}
-                      </p>
-                    )}
+                    <textarea {...register("description")} placeholder="Mô tả mục tiêu, quy trình và các thông tin quan trọng..." className={`field-input ${errors.description ? 'has-error' : ''}`} />
+                    {errors.description && <p className="field-error"><svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>{errors.description.message}</p>}
                   </div>
                 </div>
               </div>
 
-              {/* Section 2 — Time */}
+              {/* Section 2 */}
               <div className="form-section">
                 <div className="section-label">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10"/><path strokeLinecap="round" d="M12 6v6l4 2"/>
                   </svg>
                   Thời gian diễn ra
                 </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div>
                     <label className="field-label">Bắt đầu</label>
-                    <input type="datetime-local" {...register("startTime")} className={`field-input ${errors.startTime ? 'error' : ''}`} />
+                    <input type="datetime-local" {...register("startTime")} className={`field-input ${errors.startTime ? 'has-error' : ''}`} />
                     {errors.startTime && <p className="field-error">{errors.startTime.message}</p>}
                   </div>
                   <div>
                     <label className="field-label">Kết thúc</label>
-                    <input type="datetime-local" {...register("endTime")} className={`field-input ${errors.endTime ? 'error' : ''}`} />
+                    <input type="datetime-local" {...register("endTime")} className={`field-input ${errors.endTime ? 'has-error' : ''}`} />
                     {errors.endTime && <p className="field-error">{errors.endTime.message}</p>}
                   </div>
                 </div>
               </div>
 
-              {/* Section 3 — Candidates */}
+              {/* Section 3 */}
               <div className="form-section">
                 <div className="flex items-center justify-between mb-4">
                   <div className="section-label" style={{ marginBottom: 0 }}>
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
                     </svg>
                     Ứng viên
-                    <span className="ml-1 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold" style={{ letterSpacing: 0 }}>
-                      {fields.length}
-                    </span>
+                    <span className="count-badge">{fields.length}</span>
                   </div>
                   <button type="button" onClick={() => append({ name: "" })} className="btn-add-candidate">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -418,11 +352,9 @@ export default function CreateElectionPage() {
                   </button>
                 </div>
 
-                {errors.candidates?.root && (
-                  <p className="field-error mb-3">{errors.candidates.root.message}</p>
-                )}
+                {errors.candidates?.root && <p className="field-error mb-3">{errors.candidates.root.message}</p>}
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {fields.map((field, index) => (
                     <div key={field.id}>
                       <div className="candidate-row">
@@ -430,7 +362,7 @@ export default function CreateElectionPage() {
                         <input
                           {...register(`candidates.${index}.name` as const)}
                           placeholder={`Tên ứng viên ${index + 1}`}
-                          className={`field-input ${errors.candidates?.[index]?.name ? 'error' : ''}`}
+                          className={`field-input ${errors.candidates?.[index]?.name ? 'has-error' : ''}`}
                           style={{ marginBottom: 0 }}
                         />
                         <button type="button" onClick={() => remove(index)} className="btn-remove" title="Xóa">
@@ -440,20 +372,18 @@ export default function CreateElectionPage() {
                         </button>
                       </div>
                       {errors.candidates?.[index]?.name && (
-                        <p className="field-error mt-1 ml-10">{errors.candidates[index]?.name?.message}</p>
+                        <p className="field-error mt-1 ml-9">{errors.candidates[index]?.name?.message}</p>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
 
-              <hr className="divider" />
+              <hr className="form-divider" />
 
-              {/* Footer buttons */}
-              <div className="flex items-center justify-between">
-                <Link href="/elections" className="btn-cancel">
-                  ← Hủy bỏ
-                </Link>
+              {/* Footer */}
+              <div className="flex items-center justify-between pt-1">
+                <Link href="/elections" className="btn-cancel">← Hủy bỏ</Link>
                 <button type="submit" className="btn-submit">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
@@ -466,12 +396,12 @@ export default function CreateElectionPage() {
           </div>
 
           {/* Info note */}
-          <div className="mt-5 flex items-start gap-2.5 px-4 py-3 rounded-2xl border border-white/5 bg-white/2">
-            <svg className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <div className="info-note mt-4">
+            <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
             </svg>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Dữ liệu bầu cử được mã hóa hoàn toàn bởi <span className="text-slate-400 font-semibold">Oasis Sapphire TEE</span> trước khi ghi lên blockchain. Không ai — kể cả người tạo — có thể xem kết quả trước khi công bố.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Dữ liệu bầu cử được mã hóa hoàn toàn bởi <span className="font-semibold text-slate-600">Oasis Sapphire TEE</span> trước khi ghi lên blockchain. Không ai — kể cả người tạo — có thể xem kết quả trước khi công bố.
             </p>
           </div>
 

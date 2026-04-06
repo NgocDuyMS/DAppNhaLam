@@ -5,7 +5,7 @@ import PrivateVotingABI from "./PrivateVotingABI.json";
 
 
 // Dán cái địa chỉ mà Hà vừa deploy thành công ở Phần 1 vào đây
-export const CONTRACT_ADDRESS = "0x_ĐỊA_CHỈ_CONTRACT_CỦA_BẠN"; 
+export const CONTRACT_ADDRESS = "0xA8A01315E4719116D89EEC0b23fCa9eebe502A8C"; 
 
 /**
  * Hàm khởi tạo kết nối với Smart Contract

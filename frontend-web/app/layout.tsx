@@ -24,7 +24,7 @@ export default function RootLayout({
           <Navbar /> 
           
           {/* Phần nội dung linh động */}
-          <div className="flex-grow w-full">
+          <div className="grow w-full">
             {children}
           </div>
 

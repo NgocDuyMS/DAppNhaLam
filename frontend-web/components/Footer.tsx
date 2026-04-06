@@ -8,7 +8,7 @@ export default function Footer() {
 
         .footer-root {
           font-family: 'DM Sans', sans-serif;
-          background: #050917;
+          background: #f8fafc;
           border-top: 1px solid rgba(255,255,255,0.06);
           position: relative;
           overflow: hidden;
@@ -105,7 +105,7 @@ export default function Footer() {
         .icon-link {
           width: 34px; height: 34px;
           border-radius: 10px;
-          border: 1px solid rgba(255,255,255,0.07);
+          border: 1px solid rgba(0,0,0,0.08);
           background: rgba(255,255,255,0.03);
           display: flex; align-items: center; justify-content: center;
           color: #475569;
@@ -126,12 +126,18 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
 
             {/* Logo + tagline */}
-            <div className="flex flex-col gap-2">
-              <Link href="/" className="footer-logo">dAppNhaLam</Link>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-[200px]">
-                Nền tảng bỏ phiếu phi tập trung, bảo mật bởi công nghệ TEE thế hệ mới.
-              </p>
-            </div>
+            <div className="flex flex-col gap-3">
+  <Link
+    href="/"
+    className="group inline-flex items-center gap-1.5 text-cyan-400 font-bold text-lg tracking-tight hover:text-cyan-300 transition-colors duration-200"
+  >
+    <span className="w-2 h-2 rounded-full bg-cyan-400 group-hover:bg-cyan-300 transition-colors duration-200" />
+    dAppNhaLam
+  </Link>
+  <p className="text-xs text-slate-400 leading-relaxed max-w-[200px] border-l-2 border-cyan-800 pl-3">
+    Nền tảng bỏ phiếu phi tập trung, bảo mật bởi công nghệ TEE thế hệ mới.
+  </p>
+</div>
 
             {/* Nav links */}
             <div className="flex flex-col gap-2.5">

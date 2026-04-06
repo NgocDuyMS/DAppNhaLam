@@ -15,7 +15,7 @@ export default function TransactionModal({ isOpen, status, message, txHash, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md p-8 bg-white shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
         
         <div className="flex flex-col items-center text-center">
