@@ -246,7 +246,7 @@ export default function HomePage() {
 
         {/* ── HERO ─────────────────────────────────────────────── */}
         <section className="hero-wrap">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             {mounted && <div className="su d1 hero-badge"><span className="badge-dot" />Powered by Oasis Sapphire</div>}
 
             {mounted && (
