@@ -30,6 +30,8 @@ contract PrivateVoting {
     // Mapping lưu danh sách ứng viên (ĐỂ PRIVATE).
     // Nếu để public, ai cũng có thể gọi hàm xem được voteCount trước khi kết thúc!
     mapping(uint256 => Candidate[]) private electionCandidates;
+    // Lưu vết: ID Bầu cử => Mã băm của Số điện thoại => Đã vote hay chưa
+    mapping(uint256 => mapping(bytes32 => bool)) private hasPhoneVoted;
 
     // Event để ghi nhận bằng chứng khởi tạo trên sổ cái công khai
     event ElectionCreated(
@@ -110,16 +112,26 @@ contract PrivateVoting {
     }
 
     // 4. HÀM BỎ PHIẾU ẨN DANH (Nhiệm vụ Ngày 8-9 của Hà)
-    function castVote(uint256 _electionId, uint256 _candidateId) public {
+    function castVote(
+        uint256 _electionId,
+        uint256 _candidateId,
+        bytes32 _phoneHash
+    ) public {
         // Lấy thông tin cuộc bầu cử từ storage
         Election storage election = elections[_electionId];
 
         // --- BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ (VALIDATION) ---
+        // kiem tra xem vi da vote chua
         require(
             block.timestamp >= election.startTime,
             "Cuoc bau cu chua bat dau"
         );
         require(block.timestamp <= election.endTime, "Cuoc bau cu da ket thuc");
+        require(
+            !hasPhoneVoted[_electionId][_phoneHash],
+            "So dien thoai nay da duoc su dung de bo phieu!"
+        );
+        hasPhoneVoted[_electionId][_phoneHash] = true;
         require(
             !hasVoted[_electionId][msg.sender],
             "Ban da bo phieu cho cuoc bau cu nay roi"

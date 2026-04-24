@@ -43,7 +43,7 @@ export interface PrivateVotingInterface extends Interface {
 
   encodeFunctionData(
     functionFragment: "castVote",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "createElection",
@@ -175,7 +175,11 @@ export interface PrivateVoting extends BaseContract {
   ): Promise<this>;
 
   castVote: TypedContractMethod<
-    [_electionId: BigNumberish, _candidateId: BigNumberish],
+    [
+      _electionId: BigNumberish,
+      _candidateId: BigNumberish,
+      _phoneHash: BytesLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -233,7 +237,11 @@ export interface PrivateVoting extends BaseContract {
   getFunction(
     nameOrSignature: "castVote"
   ): TypedContractMethod<
-    [_electionId: BigNumberish, _candidateId: BigNumberish],
+    [
+      _electionId: BigNumberish,
+      _candidateId: BigNumberish,
+      _phoneHash: BytesLike
+    ],
     [void],
     "nonpayable"
   >;

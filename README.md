@@ -69,6 +69,7 @@ npx hardhat node
 // deploy contract len local blockchain ( them 1 terminal chay song song)
 npx hardhat run scripts/deploy.ts --network localhost
 
+
 // chạy frontend
 cd frontend-web
 
