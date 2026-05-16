@@ -7,7 +7,14 @@ import TransactionModal, { TxStatus } from "@/components/TransactionModal";
 import PrivateVotingABI from "@/utils/PrivateVotingABI.json";
 import { CONTRACT_ADDRESS, getVotingContract } from "@/utils/contract";
 import { Election, Candidate } from "@/types";
-const [phoneNumber, setPhoneNumber] = useState("");
+import { auth } from "@/utils/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+
+declare global {
+  interface Window {
+    recaptchaVerifier?: any;
+  }
+}
 
 export default function ElectionDetailPage({
   params,
@@ -26,6 +33,7 @@ export default function ElectionDetailPage({
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
   // 2. STATE QUẢN LÝ TƯƠNG TÁC NGƯỜI DÙNG
   const [selectedCandidateId, setSelectedCandidateId] = useState<number | null>(
@@ -37,6 +45,74 @@ export default function ElectionDetailPage({
     message: "",
     txHash: "",
   });
+  // state lưu kết quả chờ xác nhận từ Firebase
+  // 2. Hàm thiết lập "Khiên chống Bot" (reCAPTCHA) ,
+  // ================luồng FIREBASE OTP================
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "invisible", // Ẩn cái captcha đi cho đẹp UI
+        },
+      );
+    }
+  };
+  // 3. Hàm Bắn SMS thật
+  const handleSendOTP = async () => {
+    if (!phoneNumber || phoneNumber.length < 9) {
+      alert("Vui lòng nhập một số điện thoại hợp lệ!");
+      return;
+    }
+
+    try {
+      setupRecaptcha();
+      const appVerifier = window.recaptchaVerifier;
+
+      // Định dạng lại số điện thoại chuẩn quốc tế (+84 cho VN)
+      const formattedPhone = phoneNumber.startsWith("0")
+        ? "+84" + phoneNumber.slice(1)
+        : "+" + phoneNumber.replace(/[^0-9]/g, "");
+
+      alert(`Đang gửi SMS thật đến ${formattedPhone}... Vui lòng đợi.`);
+
+      // Yêu cầu Firebase bắn SMS
+      const result = await signInWithPhoneNumber(
+        auth,
+        formattedPhone,
+        appVerifier,
+      );
+      // Lưu kết quả lại để lát nữa kiểm tra
+      setConfirmationResult(result);
+      setIsOtpSent(true);
+    } catch (error: any) {
+      console.error("Lỗi gửi SMS:", error);
+      alert(
+        "Gửi SMS thất bại. Hãy kiểm tra lại định dạng số điện thoại hoặc reCAPTCHA.",
+      );
+      // Xóa captcha bị lỗi để thử lại
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    }
+  };
+
+  // 4. Hàm Kiểm tra mã OTP khách nhập vào
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) return;
+
+    try {
+      // Đưa mã khách gõ cho Firebase đối chiếu
+      await confirmationResult.confirm(otp);
+
+      setIsOtpVerified(true);
+      alert("Tuyệt vời! Số điện thoại đã được xác thực hoàn toàn.");
+    } catch (error) {
+      alert("Mã OTP không chính xác hoặc đã hết hạn, vui lòng thử lại.");
+    }
+  };
 
   // 3. API ĐỌC DỮ LIỆU TỪ BLOCKCHAIN (Miễn phí Gas)
   useEffect(() => {
@@ -116,27 +192,6 @@ export default function ElectionDetailPage({
     fetchElectionData();
   }, [electionId]);
 
-  // Hàm mô phỏng gửi SMS
-  const handleSendOTP = () => {
-    if (!phoneNumber || phoneNumber.length < 9) {
-      alert("Vui lòng nhập một số điện thoại hợp lệ!");
-      return;
-    }
-    // Chuyển sang bước nhập OTP
-    setIsOtpSent(true);
-    // Hiện thông báo (Bí mật dành riêng cho lúc Demo)
-    alert("Hệ thống đã gửi OTP. (Mã Demo là: 123456)");
-  };
-
-  // Hàm mô phỏng kiểm tra OTP
-  const handleVerifyOTP = () => {
-    if (otp === "123456") {
-      setIsOtpVerified(true);
-      alert("Xác thực số điện thoại thành công! Bạn đã có thể bỏ phiếu.");
-    } else {
-      alert("Mã OTP không chính xác, vui lòng thử lại.");
-    }
-  };
   // 4. API GHI LÁ PHIẾU LÊN BLOCKCHAIN (Tốn Gas - Cần Oasis Sapphire Wrap)
   const handleCastVote = async () => {
     if (!selectedCandidateId) return;
@@ -222,8 +277,7 @@ export default function ElectionDetailPage({
       setModalState((prev) => ({
         ...prev,
         status: "mining",
-        message:
-          "Hệ thống đang giải mã và công khai số phiếu. Quá trình này không thể đảo ngược...",
+        message: "Hệ thống đang giải mã và công khai số phiếu...",
         txHash: tx.hash,
       }));
 
@@ -330,6 +384,7 @@ export default function ElectionDetailPage({
               <label className="block mb-2 text-sm font-semibold text-gray-700">
                 Số điện thoại di động
               </label>
+              <div id="recaptcha-container"></div>
               <div className="flex gap-2 mb-4">
                 <input
                   type="tel"

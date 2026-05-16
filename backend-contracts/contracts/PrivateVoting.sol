@@ -116,7 +116,7 @@ contract PrivateVoting {
         uint256 _electionId,
         uint256 _candidateId,
         bytes32 _phoneHash
-    ) public {
+    ) external {
         // Lấy thông tin cuộc bầu cử từ storage
         Election storage election = elections[_electionId];
 

@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Duy_Project\\DAppNhaLam\\backend-contracts\\contracts\\PrivateVoting.sol": {
-      "lastModificationDate": 1777009457091,
-      "contentHash": "6e38b864cbcba52c51589f17c5279262",
+      "lastModificationDate": 1778337824789,
+      "contentHash": "51821c5ade5bfad85e672bfe6c3e987e",
       "sourceName": "contracts/PrivateVoting.sol",
       "solcConfig": {
         "version": "0.8.20",

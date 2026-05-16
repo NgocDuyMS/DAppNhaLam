@@ -58,9 +58,9 @@ DAppNhaLam
 git clone <your-repo-url>
 cd DAppNhaLam
 
+
 // Chạy backend ( Smartcontract )
 cd backend-contracts
-
 npm install
 // compile smart contract
 npx hardhat compile
@@ -72,7 +72,6 @@ npx hardhat run scripts/deploy.ts --network localhost
 
 // chạy frontend
 cd frontend-web
-
 npm install
 npm run dev
 👉 Truy cập: http://localhost:3000
